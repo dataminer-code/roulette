@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin the Wheel</title>
+  <style>
+    /* 배민 주아체 — 우아한형제들 공개 폰트 https://www.woowahan.com/fonts · https://github.com/woowabros/Jua */
+    @font-face {
+      font-family: 'Jua';
+      src: url('https://cdn.jsdelivr.net/gh/woowabros/Jua@master/FONT/JUA.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --rw-teal: #6FBAB7;
+      --rw-coral: #E96A5D;
+      --rw-yellow: #F7D774;
+      --rw-slate: #4D516D;
+      --rw-teal-soft: #e5f4f3;
+      --rw-coral-soft: #fcece8;
+      --rw-yellow-soft: #fff9e0;
+      --rw-slate-soft: #e8eaf0;
+      --bg: #f0f5f5;
+      --bg-card: #ffffff;
+      --stroke: #c5cad8;
+      --stroke-strong: #4D516D;
+      --text: #2d3142;
+      --muted: #5a5f73;
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --font: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      --font-title: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(247, 215, 116, 0.35) 0%, transparent 42%),
+        radial-gradient(circle at 88% 12%, rgba(111, 186, 183, 0.28) 0%, transparent 40%),
+        radial-gradient(circle at 80% 85%, rgba(233, 106, 93, 0.15) 0%, transparent 38%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .screen {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(20px, 4vw, 40px) 16px 32px;
+    }
+
+    .screen[hidden] { display: none !important; }
+
+    /* ── 시작 화면 ── */
+    .setup-card {
+      width: 100%;
+      max-width: 440px;
+      margin-top: clamp(24px, 6vh, 64px);
+      padding: clamp(28px, 5vw, 40px);
+      padding-top: clamp(32px, 5vw, 44px);
+      background: var(--bg-card);
+      border: 3px solid var(--rw-slate);
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .setup-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 8px;
+      background: linear-gradient(
+        90deg,
+        var(--rw-teal) 0%,
+        var(--rw-teal) 25%,
+        var(--rw-coral) 25%,
+        var(--rw-coral) 50%,
+        var(--rw-yellow) 50%,
+        var(--rw-yellow) 75%,
+        var(--rw-slate) 75%
+      );
+    }
+
+    .setup-hero-title {
+      font-family: var(--font-title);
+      font-size: clamp(1.85rem, 5.5vw, 2.65rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      margin-bottom: 12px;
+      color: var(--rw-slate);
+      text-align: center;
+    }
+
+    .setup-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.55;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--rw-slate);
+      margin-bottom: 8px;
+    }
+
+    .field {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1rem;
+      font-family: inherit;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--stroke);
+      background: #fffef8;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .field:focus {
+      border-color: var(--rw-teal);
+      background: #ffffff;
+      outline: 2px solid var(--rw-teal);
+      outline-offset: 2px;
+    }
+
+    .field::placeholder { color: #9aa0b5; }
+
+    textarea.field {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .field-hint {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .field-group { margin-bottom: 22px; }
+
+    #setupHint {
+      font-size: 0.88rem;
+      color: var(--rw-coral);
+      min-height: 1.3em;
+      margin-bottom: 12px;
+      font-weight: 800;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      font-family: var(--font-title);
+      letter-spacing: 0.02em;
+      border: 3px solid var(--rw-slate);
+      border-radius: 999px;
+      cursor: pointer;
+      background: var(--rw-coral);
+      color: #ffffff;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #d85a4e;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── 게임 화면 ── */
+    .screen--game {
+      gap: 0;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    .screen--game > .game-play-layout {
+      margin: 0 auto;
+    }
+
+    .game-play-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      max-width: 1240px;
+      padding: 0 12px;
+      box-sizing: border-box;
+    }
+
+    .game-top-bar {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      margin-bottom: clamp(12px, 2vw, 20px);
+      flex-shrink: 0;
+    }
+
+    .game-columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      justify-items: stretch;
+      gap: clamp(16px, 2.5vw, 36px);
+      width: 100%;
+    }
+
+    .game-center-block {
+      justify-self: center;
+      width: 100%;
+      max-width: min(96vw, 800px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 780px) {
+      .game-columns {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+      .game-center-block {
+        justify-self: center;
+      }
+      .input-panel {
+        justify-self: center;
+      }
+
+      .wheel-wrapper {
+        width: min(90vw, 600px);
+        height: min(90vw, 600px);
+      }
+
+      .pointer__shape {
+        border-left: 18px solid transparent;
+        border-right: 18px solid transparent;
+        border-top: 32px solid #F7D774;
+      }
+
+      .pointer__dot {
+        width: 9px;
+        height: 9px;
+        margin-top: -20px;
+      }
+
+      #spinBtn {
+        width: clamp(64px, 11vw, 100px);
+        height: clamp(64px, 11vw, 100px);
+        font-size: clamp(0.65rem, 2vw, 0.9rem);
+      }
+
+      .setup-card {
+        max-width: 100%;
+        padding: clamp(20px, 5vw, 30px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .wheel-wrapper {
+        width: min(85vw, 500px);
+        height: min(85vw, 500px);
+      }
+
+      #spinBtn {
+        width: clamp(56px, 10vw, 90px);
+        height: clamp(56px, 10vw, 90px);
+        font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+      }
+
+      .setup-card {
+        margin-top: clamp(16px, 4vh, 40px);
+        padding: clamp(16px, 4vw, 24px);
+        border: 2px solid var(--rw-slate);
+      }
+
+      .setup-hero-title {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+      }
+
+      .input-panel {
+        max-width: 100%;
+        padding: 16px 14px 16px 20px;
+        gap: 10px;
+        font-size: 0.9rem;
+      }
+
+      #nameInput,
+      #nameInput:focus {
+        font-size: 1rem;
+      }
+
+      .name-list {
+        max-width: 100%;
+      }
+    }
+
+    #gameTitle {
+      font-family: var(--font-title);
+      font-size: clamp(3.2rem, 10vw, 4.75rem);
+      font-weight: 900;
+      line-height: 1.06;
+      letter-spacing: -0.04em;
+      text-align: center;
+      color: var(--rw-slate);
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+      margin: 0 0 clamp(20px, 3vw, 36px);
+      padding: 0 8px;
+      width: 100%;
+    }
+
+    .btn-ghost {
+      padding: 10px 20px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      font-family: inherit;
+      color: var(--rw-slate);
+      background: #ffffff;
+      border: 2px solid var(--rw-slate);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-ghost:hover {
+      color: #ffffff;
+      background: var(--rw-teal);
+      border-color: var(--rw-slate);
+    }
+
+    .roulette-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      flex-shrink: 0;
+      width: 100%;
+    }
+
+    .wheel-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      padding-top: 20px;
+    }
+
+    .confetti-layer {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      width: min(100vw, 860px);
+      height: min(28vw, 220px);
+      max-height: 240px;
+      pointer-events: none;
+      z-index: 0;
+      overflow: visible;
+    }
+
+    .confetti {
+      position: absolute;
+      border-radius: 2px;
+    }
+
+    .confetti--sq1 { width: 8px; height: 8px; background: #E96A5D; top: 18%; left: 12%; transform: rotate(12deg); }
+    .confetti--sq2 { width: 6px; height: 6px; background: #6FBAB7; top: 42%; left: 6%; transform: rotate(-8deg); }
+    .confetti--sq3 { width: 7px; height: 7px; background: #F7D774; top: 8%; left: 78%; transform: rotate(25deg); }
+    .confetti--sq4 { width: 6px; height: 6px; background: #4D516D; top: 55%; left: 88%; transform: rotate(40deg); }
+    .confetti--sq5 { width: 8px; height: 8px; background: #F7D774; top: 28%; left: 92%; transform: rotate(-15deg); }
+    .confetti--sq6 { width: 5px; height: 5px; background: #E96A5D; top: 62%; left: 18%; transform: rotate(33deg); }
+    .confetti--sq7 { width: 6px; height: 6px; background: #6FBAB7; top: 12%; left: 48%; transform: rotate(-22deg); }
+
+    .confetti--spiral {
+      width: 14px;
+      height: 14px;
+      border: 3px solid #E96A5D;
+      border-radius: 50%;
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+      background: transparent;
+    }
+    .confetti--sp1 { top: 22%; left: 22%; transform: rotate(20deg); }
+    .confetti--sp2 { top: 38%; left: 68%; transform: rotate(-30deg); border-color: #6FBAB7; border-right-color: transparent; border-bottom-color: transparent; }
+    .confetti--sp3 { top: 6%; left: 62%; transform: rotate(55deg); border-color: #4D516D; border-right-color: transparent; border-bottom-color: transparent; }
+
+    .wheel-wrapper {
+      position: relative;
+      width: min(96vw, 800px);
+      height: min(96vw, 800px);
+      z-index: 2;
+    }
+
+    #rouletteCanvas {
+      border-radius: 50%;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 12;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .pointer__shape {
+      width: 0;
+      height: 0;
+      border-left: 24px solid transparent;
+      border-right: 24px solid transparent;
+      border-top: 42px solid #F7D774;
+    }
+
+    .pointer__dot {
+      width: 11px;
+      height: 11px;
+      margin-top: -26px;
+      background: #4D516D;
+      border-radius: 50%;
+    }
+
+    #spinBtn {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 15;
+      width: clamp(72px, 12.5%, 118px);
+      height: clamp(72px, 12.5%, 118px);
+      padding: 6px;
+      margin: 0;
+      font-size: clamp(0.7rem, 2.4vw, 1rem);
+      font-weight: 800;
+      font-family: var(--font-title);
+      letter-spacing: 0.02em;
+      line-height: 1.15;
+      text-align: center;
+      background: var(--rw-slate);
+      color: #ffffff;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: opacity 0.15s, background 0.2s, border-color 0.2s;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #spinBtn:hover:not(:disabled) {
+      background: #3f4359;
+    }
+
+    #spinBtn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      border-color: rgba(255, 255, 255, 0.65);
+    }
+
+    #spinBtn:not(:disabled):active {
+      background: #353949;
+    }
+
+    #spinHint {
+      font-size: 0.82rem;
+      color: var(--rw-slate);
+      font-weight: 800;
+      min-height: 1.2em;
+      text-align: center;
+    }
+
+    .input-panel {
+      justify-self: start;
+      width: 100%;
+      max-width: 360px;
+      min-width: 260px;
+      padding: 22px 18px 22px 28px;
+      background: linear-gradient(180deg, #ffffff 0%, var(--rw-teal-soft) 100%);
+      border: 3px solid var(--rw-slate);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      justify-self: center;
+      font-size: 1rem;
+    }
+
+    .input-panel::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: linear-gradient(
+        180deg,
+        var(--rw-teal),
+        var(--rw-coral),
+        var(--rw-yellow)
+      );
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    #nameInput {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+      font-size: 1rem;
+      font-family: inherit;
+      border-radius: 12px;
+      border: 2px solid var(--stroke);
+      background: #fffef8;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    #nameInput:focus {
+      border-color: var(--rw-teal);
+      background: #ffffff;
+      outline: 2px solid var(--rw-teal);
+      outline-offset: 1px;
+    }
+
+    #addBtn {
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      font-family: var(--font-title);
+      background: var(--rw-teal);
+      color: #ffffff;
+      border: 2px solid var(--rw-slate);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    #addBtn:hover {
+      background: #5da8a5;
+    }
+    #addBtn:active { background: #4a9895; }
+
+    #addHint {
+      font-size: 0.88rem;
+      color: var(--rw-coral);
+      font-weight: 800;
+      min-height: 1.15em;
+    }
+
+    .name-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--rw-slate);
+      letter-spacing: 0.03em;
+    }
+
+    #nameCount {
+      color: var(--rw-coral);
+      font-weight: 800;
+      padding: 3px 10px;
+      background: var(--rw-yellow-soft);
+      border-radius: 999px;
+      border: 2px solid var(--rw-yellow);
+      font-size: 0.95rem;
+    }
+
+    #nameList {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 148px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    #nameList::-webkit-scrollbar { width: 8px; }
+    #nameList::-webkit-scrollbar-track { background: var(--rw-slate-soft); border-radius: 4px; }
+    #nameList::-webkit-scrollbar-thumb { background: var(--rw-teal); border-radius: 4px; border: 2px solid var(--rw-slate-soft); }
+
+    #nameList li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #ffffff;
+      border-radius: 11px;
+      border: 2px solid var(--rw-slate);
+      border-left-width: 5px;
+      font-size: 0.95rem;
+      animation: fadeIn 0.22s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    #nameList li .name-text { flex: 1; word-break: break-all; }
+
+    #nameList li .del-btn {
+      background: var(--rw-coral-soft);
+      border: 2px solid transparent;
+      color: var(--rw-coral);
+      cursor: pointer;
+      font-size: 1.05rem;
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 9px;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+
+    #nameList li .del-btn:hover {
+      color: #ffffff;
+      background: var(--rw-coral);
+      border-color: var(--rw-slate);
+    }
+
+    .winner-log {
+      margin-top: 8px;
+      padding-top: 14px;
+      border-top: 2px dashed var(--stroke);
+    }
+
+    .winner-log__header {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--rw-slate);
+      letter-spacing: 0.03em;
+      margin-bottom: 10px;
+    }
+
+    .winner-log__list {
+      list-style: none;
+      counter-reset: win;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 152px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin: 0;
+    }
+
+    .winner-log__list::-webkit-scrollbar { width: 8px; }
+    .winner-log__list::-webkit-scrollbar-track { background: var(--rw-slate-soft); border-radius: 4px; }
+    .winner-log__list::-webkit-scrollbar-thumb { background: var(--rw-coral); border-radius: 4px; }
+
+    .winner-log__list li {
+      counter-increment: win;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 9px 11px;
+      background: var(--rw-yellow-soft);
+      border: 2px solid var(--rw-yellow);
+      border-radius: 11px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--rw-slate);
+      line-height: 1.3;
+    }
+
+    .winner-log__list li::before {
+      content: counter(win) '.';
+      flex-shrink: 0;
+      min-width: 1.2em;
+      color: var(--rw-coral);
+    }
+
+    .winner-log__empty {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 800;
+      margin: 0;
+      padding: 8px 0;
+    }
+
+    .winner-log__empty[hidden] {
+      display: none !important;
+    }
+
+    #modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(77, 81, 109, 0.55);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #modal.open { display: flex; }
+
+    .modal-box {
+      background: linear-gradient(165deg, #fffef5 0%, var(--rw-yellow-soft) 45%, #ffffff 100%);
+      border: 3px solid var(--rw-slate);
+      border-radius: var(--radius-lg);
+      padding: clamp(36px, 6vw, 52px) clamp(28px, 5vw, 48px);
+      text-align: center;
+      animation: popIn 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+      max-width: min(92vw, 420px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(
+        90deg,
+        var(--rw-teal),
+        var(--rw-coral),
+        var(--rw-yellow),
+        var(--rw-slate)
+      );
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.88); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-label {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--rw-slate);
+      letter-spacing: 0.12em;
+      margin-bottom: 16px;
+      padding: 8px 16px;
+      display: inline-block;
+      background: var(--rw-teal-soft);
+      border: 2px solid var(--rw-teal);
+      border-radius: 999px;
+    }
+
+    #winnerName {
+      font-family: var(--font-title);
+      font-size: clamp(2.5rem, 7vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--rw-slate);
+      margin-bottom: 28px;
+      word-break: break-all;
+      line-height: 1.2;
+    }
+
+    #confirmBtn {
+      padding: 14px 48px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      font-family: var(--font-title);
+      background: var(--rw-coral);
+      color: #ffffff;
+      border: 3px solid var(--rw-slate);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #confirmBtn:hover {
+      background: #d85a4e;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 시작 화면 -->
+<div id="setupScreen" class="screen">
+  <div class="setup-card">
+    <h2 class="setup-hero-title">Spin the Wheel</h2>
+    <p class="setup-desc">제목과 참가자를 입력한 뒤 시작하세요. 이름은 띄어쓰기·줄바꿈으로 여러 명을 한 번에 넣을 수 있어요.</p>
+
+    <div class="field-group">
+      <label class="field-label" for="titleInput">제목</label>
+      <input id="titleInput" class="field" type="text" placeholder="예: 미션편지 응답한 친구들 선물 당첨자" maxlength="60">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="bulkNamesInput">참가자 이름</label>
+      <textarea id="bulkNamesInput" class="field" placeholder="서준 하윤 지우 채원&#10;시우 지아 도윤 예은&#10;(띄어쓰기·줄바꿈으로 구분)"></textarea>
+      <p class="field-hint">공백(스페이스, 탭, 줄바꿈)마다 한 명으로 나뉩니다. 중복은 자동으로 제외됩니다.</p>
+    </div>
+
+    <div id="setupHint"></div>
+    <button type="button" id="startGameBtn" class="btn-primary">룰렛 시작</button>
+  </div>
+</div>
+
+<!-- 게임 화면 -->
+<div id="gameScreen" class="screen screen--game" hidden>
+  <div class="game-play-layout">
+    <div class="game-top-bar">
+      <button type="button" id="backToSetupBtn" class="btn-ghost">처음으로</button>
+    </div>
+
+    <div class="game-columns">
+    <div class="game-center-block">
+      <h1 id="gameTitle">룰렛</h1>
+      <div class="roulette-area">
+      <div class="wheel-stage">
+        <div class="confetti-layer" aria-hidden="true">
+          <span class="confetti confetti--sq1"></span>
+          <span class="confetti confetti--sq2"></span>
+          <span class="confetti confetti--sq3"></span>
+          <span class="confetti confetti--sq4"></span>
+          <span class="confetti confetti--sq5"></span>
+          <span class="confetti confetti--sq6"></span>
+          <span class="confetti confetti--sq7"></span>
+          <span class="confetti confetti--spiral confetti--sp1"></span>
+          <span class="confetti confetti--spiral confetti--sp2"></span>
+          <span class="confetti confetti--spiral confetti--sp3"></span>
+        </div>
+        <div class="wheel-wrapper">
+          <div class="pointer">
+            <div class="pointer__shape"></div>
+            <div class="pointer__dot"></div>
+          </div>
+          <canvas id="rouletteCanvas" width="800" height="800"></canvas>
+          <button type="button" id="spinBtn" disabled aria-label="룰렛 돌리기">돌리기</button>
+        </div>
+      </div>
+      <div id="spinHint">이름을 2명 이상 등록해 주세요</div>
+      </div>
+    </div>
+
+    <aside class="input-panel" aria-label="참가자 및 당첨 기록">
+      <div class="input-row">
+        <input id="nameInput" type="text" placeholder="예: 하윤 서준 (공백으로 여러 명)" maxlength="200">
+        <button id="addBtn">등록</button>
+      </div>
+      <div id="addHint"></div>
+      <div class="name-list-header">
+        <span>참가자</span>
+        <span><span id="nameCount">0</span> / 50</span>
+      </div>
+      <ul id="nameList"></ul>
+
+      <div class="winner-log">
+        <div class="winner-log__header">당첨 순서</div>
+        <ul id="winnerOrderList" class="winner-log__list" aria-label="당첨자 명단"></ul>
+        <p id="winnerLogEmpty" class="winner-log__empty">아직 당첨자가 없어요</p>
+      </div>
+    </aside>
+    </div>
+  </div>
+</div>
+
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-label">당첨</div>
+    <div id="winnerName"></div>
+    <button type="button" id="confirmBtn">확인</button>
+  </div>
+</div>
+
+<script>
+  const SLATE = '#4D516D';
+  const WHEEL_PALETTE = [
+    { fill: '#6FBAB7', text: '#142828' },
+    { fill: '#E96A5D', text: '#1a1210' },
+    { fill: '#F7D774', text: '#2a2610' },
+    { fill: '#4D516D', text: '#ffffff' }
+  ];
+
+  const setupScreen = document.getElementById('setupScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const titleInput = document.getElementById('titleInput');
+  const bulkNamesInput = document.getElementById('bulkNamesInput');
+  const startGameBtn = document.getElementById('startGameBtn');
+  const setupHint = document.getElementById('setupHint');
+  const gameTitle = document.getElementById('gameTitle');
+  const backToSetupBtn = document.getElementById('backToSetupBtn');
+
+  const canvas  = document.getElementById('rouletteCanvas');
+  const ctx     = canvas.getContext('2d');
+  const LOGICAL = 800;
+  const CX = LOGICAL / 2;
+  const CY = LOGICAL / 2;
+  const RO = 390;
+  const RIM_W = 28;
+  const R_IN = RO - RIM_W;
+  const PEG_R = 7;
+  const rPeg = R_IN + RIM_W * 0.52;
+
+  function syncCanvasResolution() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = LOGICAL * dpr;
+    canvas.height = LOGICAL * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawWheel();
+  }
+
+  const spinBtn = document.getElementById('spinBtn');
+  const spinHint= document.getElementById('spinHint');
+  const nameInput = document.getElementById('nameInput');
+  const addBtn  = document.getElementById('addBtn');
+  const addHint = document.getElementById('addHint');
+  const nameList= document.getElementById('nameList');
+  const nameCount = document.getElementById('nameCount');
+  const modal   = document.getElementById('modal');
+  const winnerName = document.getElementById('winnerName');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const winnerOrderList = document.getElementById('winnerOrderList');
+  const winnerLogEmpty = document.getElementById('winnerLogEmpty');
+
+  let names = [];
+  let winnerHistory = [];
+  let currentAngle = 0;
+  let spinning = false;
+  let pendingWinner = null;
+
+  function renderWinnerLog() {
+    winnerOrderList.innerHTML = '';
+    winnerHistory.forEach(name => {
+      const li = document.createElement('li');
+      li.textContent = name;
+      winnerOrderList.appendChild(li);
+    });
+    winnerLogEmpty.hidden = winnerHistory.length > 0;
+  }
+
+  function splitNames(raw) {
+    return raw
+      .split(/\s+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  function mergeUniqueNames(existing, incoming) {
+    const set = new Set(existing);
+    for (const n of incoming) {
+      if (set.size >= 50) break;
+      if (!set.has(n)) set.add(n);
+    }
+    return Array.from(set);
+  }
+
+  function showSetupHint(msg) {
+    setupHint.textContent = msg;
+    if (msg) setTimeout(() => { if (setupHint.textContent === msg) setupHint.textContent = ''; }, 3200);
+  }
+
+  function startFromSetup() {
+    const title = titleInput.value.trim() || '룰렛 돌리기';
+    const parts = splitNames(bulkNamesInput.value);
+    if (parts.length < 2) {
+      showSetupHint('참가자를 2명 이상 입력해 주세요. (띄어쓰기·줄바꿈으로 구분)');
+      return;
+    }
+    const unique = [];
+    const seen = new Set();
+    for (const n of parts) {
+      if (seen.has(n)) continue;
+      seen.add(n);
+      unique.push(n);
+      if (unique.length >= 50) break;
+    }
+    if (unique.length < 2) {
+      showSetupHint('서로 다른 이름이 2명 이상 필요합니다.');
+      return;
+    }
+    names = unique;
+    winnerHistory = [];
+    renderWinnerLog();
+    gameTitle.textContent = title;
+    setupHint.textContent = '';
+    setupScreen.hidden = true;
+    gameScreen.hidden = false;
+    renderList();
+  }
+
+  backToSetupBtn.addEventListener('click', () => {
+    gameScreen.hidden = true;
+    setupScreen.hidden = false;
+    winnerHistory = [];
+    renderWinnerLog();
+    bulkNamesInput.value = names.join(' ');
+    titleInput.value = gameTitle.textContent === '룰렛 돌리기' ? '' : gameTitle.textContent;
+  });
+
+  startGameBtn.addEventListener('click', startFromSetup);
+
+  function drawWheelRimAndPegs(sliceCount, slice, angleOffset) {
+    const pegBase = angleOffset !== undefined ? angleOffset : currentAngle;
+    ctx.beginPath();
+    ctx.arc(CX, CY, RO, 0, Math.PI * 2);
+    ctx.arc(CX, CY, R_IN, 0, Math.PI * 2, true);
+    ctx.fillStyle = SLATE;
+    ctx.fill('evenodd');
+
+    for (let k = 0; k <= sliceCount; k++) {
+      const ang = pegBase + slice * k;
+      const px = CX + Math.cos(ang) * rPeg;
+      const py = CY + Math.sin(ang) * rPeg;
+      ctx.beginPath();
+      ctx.arc(px, py, PEG_R, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+    }
+  }
+
+  function drawWheel() {
+    ctx.clearRect(0, 0, LOGICAL, LOGICAL);
+
+    if (names.length === 0) {
+      const previewCount = 8;
+      const slice = (Math.PI * 2) / previewCount;
+      for (let i = 0; i < previewCount; i++) {
+        const startAngle = slice * i;
+        const endAngle = startAngle + slice;
+        const p = WHEEL_PALETTE[i % 4];
+        ctx.beginPath();
+        ctx.moveTo(CX, CY);
+        ctx.arc(CX, CY, R_IN, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = p.fill;
+        ctx.fill();
+      }
+      drawWheelRimAndPegs(previewCount, slice, 0);
+      return;
+    }
+
+    const slice = (Math.PI * 2) / names.length;
+
+    names.forEach((name, i) => {
+      const startAngle = currentAngle + slice * i;
+      const endAngle   = startAngle + slice;
+      const p = WHEEL_PALETTE[i % 4];
+
+      ctx.beginPath();
+      ctx.moveTo(CX, CY);
+      ctx.arc(CX, CY, R_IN, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = p.fill;
+      ctx.fill();
+
+      ctx.save();
+      ctx.translate(CX, CY);
+      ctx.rotate(startAngle + slice / 2);
+
+      const maxLen = 10;
+      const label  = name.length > maxLen ? name.slice(0, maxLen) + '…' : name;
+
+      // 캔버스 크기에 따라 동적으로 폰트 크기 조정
+      const canvasSize = canvas.width;
+      let baseFontSize;
+
+      if (canvasSize >= 800) {
+        // 데스크톱
+        baseFontSize = names.length <= 10 ? 30 : names.length <= 20 ? 24 : 20;
+      } else if (canvasSize >= 600) {
+        // 태블릿
+        baseFontSize = names.length <= 10 ? 26 : names.length <= 20 ? 21 : 18;
+      } else {
+        // 모바일
+        baseFontSize = names.length <= 10 ? 22 : names.length <= 20 ? 18 : 15;
+      }
+
+      const fontSize = baseFontSize;
+      ctx.font = `${fontSize}px Jua, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`;
+      ctx.fillStyle = p.text;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, R_IN - 24, 0);
+      ctx.restore();
+    });
+
+    drawWheelRimAndPegs(names.length, slice);
+  }
+
+  function renderList() {
+    nameList.innerHTML = '';
+    names.forEach((name, i) => {
+      const li = document.createElement('li');
+      li.style.borderLeftColor = WHEEL_PALETTE[i % 4].fill;
+
+      const span = document.createElement('span');
+      span.className = 'name-text';
+      span.textContent = name;
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'del-btn';
+      del.textContent = '✕';
+      del.title = '제거';
+      del.addEventListener('click', () => removeName(i));
+
+      li.appendChild(span);
+      li.appendChild(del);
+      nameList.appendChild(li);
+    });
+    nameCount.textContent = names.length;
+    updateSpinBtn();
+    drawWheel();
+  }
+
+  function updateSpinBtn() {
+    if (names.length < 2) {
+      spinBtn.disabled = true;
+      spinHint.textContent = '이름을 2명 이상 등록해 주세요';
+    } else {
+      spinBtn.disabled = spinning;
+      spinHint.textContent = '';
+    }
+  }
+
+  function addName() {
+    const raw = nameInput.value;
+    const parts = splitNames(raw);
+    if (parts.length === 0) {
+      showAddHint('이름을 입력해 주세요.');
+      return;
+    }
+    const prevLen = names.length;
+    const existing = new Set(names);
+    const uniqueNew = [...new Set(parts)].filter(p => !existing.has(p));
+    names = mergeUniqueNames(names, parts);
+    const added = names.length - prevLen;
+    if (added === 0) {
+      showAddHint('추가할 새 이름이 없습니다. (중복은 제외됩니다)');
+      return;
+    }
+    if (names.length === 50 && uniqueNew.length > added) {
+      showAddHint('최대 50명까지 등록 가능합니다.');
+    } else {
+      addHint.textContent = '';
+    }
+    nameInput.value = '';
+    nameInput.focus();
+    renderList();
+  }
+
+  function removeName(i) {
+    names.splice(i, 1);
+    renderList();
+  }
+
+  function showAddHint(msg) {
+    addHint.textContent = msg;
+    setTimeout(() => { addHint.textContent = ''; }, 2500);
+  }
+
+  function spin() {
+    if (spinning || names.length < 2) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    spinHint.textContent = '';
+
+    const extraTurns = (5 + Math.random() * 4) * Math.PI * 2;
+    const targetAngle = currentAngle + extraTurns;
+
+    const duration = 3500 + Math.random() * 1500;
+    const startAngle = currentAngle;
+    const startTime  = performance.now();
+
+    function easeOut(t) {
+      return 1 - Math.pow(1 - t, 4);
+    }
+
+    function frame(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      currentAngle = startAngle + (targetAngle - startAngle) * easeOut(t);
+      drawWheel();
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        currentAngle = targetAngle % (Math.PI * 2);
+        spinning = false;
+        showResult();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function showResult() {
+    const pointerAngle = -Math.PI / 2;
+    const slice = (Math.PI * 2) / names.length;
+    let relative = ((pointerAngle - currentAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+    const idx = Math.floor(relative / slice) % names.length;
+
+    pendingWinner = names[idx];
+    winnerName.textContent = pendingWinner;
+    modal.classList.add('open');
+  }
+
+  confirmBtn.addEventListener('click', () => {
+    modal.classList.remove('open');
+    if (pendingWinner !== null) {
+      winnerHistory.push(pendingWinner);
+      renderWinnerLog();
+      const idx = names.indexOf(pendingWinner);
+      if (idx !== -1) names.splice(idx, 1);
+      pendingWinner = null;
+    }
+    renderList();
+    updateSpinBtn();
+  });
+
+  addBtn.addEventListener('click', addName);
+  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addName(); });
+  spinBtn.addEventListener('click', spin);
+
+  renderWinnerLog();
+  syncCanvasResolution();
+</script>
+</body>
+</html>
